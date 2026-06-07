@@ -1,0 +1,198 @@
+/* ------------------------------------------------------------------ */
+/* Hero — centered layout (overrides style.css two-column grid)        */
+/* ------------------------------------------------------------------ */
+
+.hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 5rem 2rem 4rem;
+    gap: 3rem;
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+.hero-inner {
+    max-width: 620px;
+    width: 100%;
+}
+
+/* Badge */
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    margin-bottom: 1.75rem;
+}
+
+.badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+}
+
+/* Title */
+.hero-title {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+}
+
+.hero-title-accent {
+    display: block;
+    color: var(--accent);
+    font-style: normal;
+}
+
+/* Subtitle */
+.hero-subtitle {
+    font-size: 1.05rem;
+    color: var(--ink-muted);
+    line-height: 1.7;
+    max-width: 100%;
+    margin-bottom: 2rem;
+}
+
+/* Buttons */
+.hero-actions {
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Dashboard card                                                       */
+/* ------------------------------------------------------------------ */
+
+.hero-dashboard {
+    width: 100%;
+    max-width: 660px;
+}
+
+.dashboard-card {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+    text-align: left;
+}
+
+/* macOS-style window controls */
+.dashboard-controls {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+}
+
+.dc {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.dc--red    { background: #ff5f57; }
+.dc--yellow { background: #febc2e; }
+.dc--green  { background: #28c840; }
+
+/* Stat tiles */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.dashboard-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.ds-label {
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    font-weight: 500;
+}
+
+.ds-value {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    color: var(--ink);
+    line-height: 1.2;
+}
+
+.ds-sub {
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    font-weight: 500;
+}
+
+.ds-sub--up { color: var(--danger); }
+.ds-sub--ok { color: var(--accent); }
+
+/* Bars */
+.dashboard-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.db-row {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.db-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+}
+
+.db-track {
+    height: 8px;
+    background: var(--border-soft);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.db-bar {
+    height: 100%;
+    border-radius: 999px;
+}
+
+.db-bar--orange { background: #f59e0b; }
+.db-bar--blue   { background: #6366f1; }
+.db-bar--purple { background: #a78bfa; }
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                           */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 600px) {
+    .dashboard-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .dashboard-stats .dashboard-stat:last-child {
+        grid-column: 1 / -1;
+    }
+}
