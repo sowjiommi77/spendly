@@ -1,8 +1,8 @@
 import os
 import sqlite3
 
-from flask import Flask, render_template, request, redirect, url_for
-from werkzeug.security import generate_password_hash
+from flask import Flask, render_template, request, redirect, url_for, session
+from werkzeug.security import generate_password_hash, check_password_hash
 from database.db import get_db, init_db, seed_db
 
 app = Flask(__name__)
@@ -24,6 +24,9 @@ def landing():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if session.get("user_id"):
+        return redirect(url_for("landing"))
+
     error = None
     name = ""
     email = ""
@@ -56,9 +59,33 @@ def register():
     return render_template("register.html", error=error, name=name, email=email)
 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("login.html")
+    if session.get("user_id"):
+        return redirect(url_for("landing"))
+
+    error = None
+
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+
+        if not email or not password:
+            error = "Please enter your email and password."
+        else:
+            conn = get_db()
+            user = conn.execute(
+                "SELECT id, password_hash FROM users WHERE email = ?", (email,)
+            ).fetchone()
+            conn.close()
+
+            if user is None or not check_password_hash(user["password_hash"], password):
+                error = "Invalid email or password."
+            else:
+                session["user_id"] = user["id"]
+                return redirect(url_for("landing"))
+
+    return render_template("login.html", error=error)
 
 
 @app.route("/terms")
@@ -77,7 +104,8 @@ def privacy():
 
 @app.route("/logout")
 def logout():
-    return "Logout — coming in Step 3"
+    session.clear()
+    return redirect(url_for("landing"))
 
 
 @app.route("/profile")
