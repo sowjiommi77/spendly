@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -113,33 +114,61 @@ def profile():
     if not session.get("user_id"):
         return redirect(url_for("login"))
 
+    conn = get_db()
+    row = conn.execute(
+        "SELECT * FROM users WHERE id = ?", (session["user_id"],)
+    ).fetchone()
+    expense_rows = conn.execute(
+        "SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC",
+        (session["user_id"],),
+    ).fetchall()
+    conn.close()
+
+    initials = "".join(w[0] for w in row["name"].split())[:2].upper()
+    member_since = datetime.strptime(row["created_at"], "%Y-%m-%d %H:%M:%S").strftime("%B %Y")
+
+    total_spent = sum(r["amount"] for r in expense_rows)
+    transaction_count = len(expense_rows)
+
+    cat_totals = {}
+    for r in expense_rows:
+        cat_totals[r["category"]] = cat_totals.get(r["category"], 0) + r["amount"]
+
+    top_category = max(cat_totals, key=cat_totals.get) if cat_totals else "—"
+
     user = {
-        "name": "Demo User",
-        "email": "demo@spendly.com",
-        "member_since": "June 2026",
-        "initials": "DU",
+        "name": row["name"],
+        "email": row["email"],
+        "member_since": member_since,
+        "initials": initials,
     }
     stats = {
-        "total_spent": 392.49,
-        "transaction_count": 8,
-        "top_category": "Bills",
+        "total_spent": total_spent,
+        "transaction_count": transaction_count,
+        "top_category": top_category,
     }
     transactions = [
-        {"date": "Jun 15", "description": "Restaurant dinner", "category": "Food",          "amount": 55.00},
-        {"date": "Jun 11", "description": "New shoes",         "category": "Shopping",      "amount": 89.99},
-        {"date": "Jun 09", "description": "Cinema tickets",    "category": "Entertainment", "amount": 25.00},
-        {"date": "Jun 07", "description": "Pharmacy",          "category": "Health",        "amount": 35.00},
-        {"date": "Jun 05", "description": "Electricity bill",  "category": "Bills",         "amount": 120.00},
+        {
+            "date": r["date"],
+            "description": r["description"] or "",
+            "category": r["category"],
+            "amount": r["amount"],
+        }
+        for r in expense_rows[:5]
     ]
-    categories = [
-        {"name": "Bills",         "total": 120.00, "pct": 31},
-        {"name": "Food",          "total": 97.50,  "pct": 25},
-        {"name": "Shopping",      "total": 89.99,  "pct": 23},
-        {"name": "Health",        "total": 35.00,  "pct": 9},
-        {"name": "Entertainment", "total": 25.00,  "pct": 6},
-        {"name": "Transport",     "total": 15.00,  "pct": 4},
-        {"name": "Other",         "total": 10.00,  "pct": 3},
-    ]
+    categories = sorted(
+        [
+            {
+                "name": k,
+                "total": v,
+                "pct": round(v / total_spent * 100) if total_spent else 0,
+            }
+            for k, v in cat_totals.items()
+        ],
+        key=lambda c: c["total"],
+        reverse=True,
+    )
+
     return render_template("profile.html", user=user, stats=stats,
                            transactions=transactions, categories=categories)
 
